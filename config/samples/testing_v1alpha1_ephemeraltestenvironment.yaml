@@ -1,0 +1,9 @@
+apiVersion: testing.cast.ai/v1alpha1
+kind: EphemeralTestEnvironment
+metadata:
+  labels:
+    app.kubernetes.io/name: ephemeral-test-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: ephemeraltestenvironment-sample
+spec:
+  # TODO(user): Add fields here

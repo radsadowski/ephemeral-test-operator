@@ -3,9 +3,19 @@
 # and allow the plugins properly work.
 # More info: https://book.kubebuilder.io/reference/project-config.html
 cliVersion: 4.10.1
-domain: example.com
+domain: cast.ai
 layout:
 - go.kubebuilder.io/v4
 projectName: ephemeral-test-operator
 repo: github.com/radekska/ephemeral-test-operator
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: cast.ai
+  group: testing
+  kind: EphemeralTestEnvironment
+  path: github.com/radekska/ephemeral-test-operator/api/v1alpha1
+  version: v1alpha1
 version: "3"

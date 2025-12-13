@@ -1,0 +1,4 @@
+## Append samples of your project ##
+resources:
+- testing_v1alpha1_ephemeraltestenvironment.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples
