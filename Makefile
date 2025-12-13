@@ -67,6 +67,9 @@ test: manifests generate fmt vet setup-envtest ## Run tests.
 # - CERT_MANAGER_INSTALL_SKIP=true
 KIND_CLUSTER ?= ephemeral-test-operator-test-e2e
 
+# KIND_CLUSTER_DEV is the name of the Kind cluster for local development
+KIND_CLUSTER_DEV ?= ephemeral-test-operator-dev
+
 .PHONY: setup-test-e2e
 setup-test-e2e: ## Set up a Kind cluster for e2e tests if it does not exist
 	@command -v $(KIND) >/dev/null 2>&1 || { \
@@ -145,6 +148,43 @@ build-installer: manifests generate kustomize ## Generate a consolidated YAML wi
 	mkdir -p dist
 	cd config/manager && "$(KUSTOMIZE)" edit set image controller=${IMG}
 	"$(KUSTOMIZE)" build config/default > dist/install.yaml
+
+##@ Kind Cluster
+
+.PHONY: kind-create
+kind-create: ## Create a Kind cluster for local development
+	@command -v $(KIND) >/dev/null 2>&1 || { \
+		echo "Kind is not installed. Please install Kind manually."; \
+		exit 1; \
+	}
+	@case "$$($(KIND) get clusters)" in \
+		*"$(KIND_CLUSTER_DEV)"*) \
+			echo "Kind cluster '$(KIND_CLUSTER_DEV)' already exists." ;; \
+		*) \
+			echo "Creating Kind cluster '$(KIND_CLUSTER_DEV)'..."; \
+			$(KIND) create cluster --name $(KIND_CLUSTER_DEV); \
+			echo "Kind cluster '$(KIND_CLUSTER_DEV)' created successfully." ;; \
+	esac
+
+.PHONY: kind-delete
+kind-delete: ## Delete the Kind cluster
+	@$(KIND) delete cluster --name $(KIND_CLUSTER_DEV)
+
+.PHONY: kind-load-image
+kind-load-image: ## Load the controller Docker image into the Kind cluster
+	@command -v $(KIND) >/dev/null 2>&1 || { \
+		echo "Kind is not installed. Please install Kind manually."; \
+		exit 1; \
+	}
+	@case "$$($(KIND) get clusters)" in \
+		*"$(KIND_CLUSTER_DEV)"*) \
+			echo "Loading image ${IMG} into Kind cluster '$(KIND_CLUSTER_DEV)'..."; \
+			$(KIND) load docker-image ${IMG} --name $(KIND_CLUSTER_DEV); \
+			echo "Image loaded successfully." ;; \
+		*) \
+			echo "Kind cluster '$(KIND_CLUSTER_DEV)' does not exist. Create it first with 'make kind-create'"; \
+			exit 1 ;; \
+	esac
 
 ##@ Deployment
 

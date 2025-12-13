@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -47,11 +48,14 @@ type EphemeralTestEnvironmentReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.22.4/pkg/reconcile
 func (r *EphemeralTestEnvironmentReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = logf.FromContext(ctx)
+	log := logf.FromContext(ctx)
+	log.Info("reconcile loop triggered")
 
 	// TODO(user): your logic here
 
-	return ctrl.Result{}, nil
+	return ctrl.Result{
+		RequeueAfter: time.Second * 5,
+	}, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

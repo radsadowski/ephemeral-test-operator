@@ -17,73 +17,74 @@ limitations under the License.
 package v1alpha1
 
 import (
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
-// EphemeralTestEnvironmentSpec defines the desired state of EphemeralTestEnvironment
+// EphemeralTestEnvironmentSpec defines the desired state
 type EphemeralTestEnvironmentSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-	// The following markers will use OpenAPI v3 schema to validate the value
-	// More info: https://book.kubebuilder.io/reference/markers/crd-validation.html
+	// GitLab MR information
+	GitLabMR GitLabMRInfo `json:"gitlabMR"`
 
-	// foo is an example field of EphemeralTestEnvironment. Edit ephemeraltestenvironment_types.go to remove/update
-	// +optional
-	Foo *string `json:"foo,omitempty"`
+	// Application to deploy
+	ApplicationTemplate ApplicationTemplate `json:"applicationTemplate"`
+
+	// Test suite configuration
+	TestSuite TestSuiteSpec `json:"testSuite"`
+
+	// TTL for auto-cleanup
+	TTL string `json:"ttl,omitempty"`
 }
 
-// EphemeralTestEnvironmentStatus defines the observed state of EphemeralTestEnvironment.
+type GitLabMRInfo struct {
+	ProjectID    int    `json:"projectId"`
+	MRIID        int    `json:"mrIid"`
+	SourceBranch string `json:"sourceBranch"`
+	CommitSHA    string `json:"commitSha"`
+}
+
+type ApplicationTemplate struct {
+	HelmChart string                `json:"helmChart"`
+	Values    *apiextensionsv1.JSON `json:"values,omitempty"`
+}
+
+type TestSuiteSpec struct {
+	Image            string `json:"image"`
+	WorkflowTemplate string `json:"workflowTemplate"`
+}
+
+// EphemeralTestEnvironmentStatus defines the observed state
 type EphemeralTestEnvironmentStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// For Kubernetes API conventions, see:
-	// https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#typical-status-properties
-
-	// conditions represent the current state of the EphemeralTestEnvironment resource.
-	// Each condition has a unique type and reflects the status of a specific aspect of the resource.
-	//
-	// Standard condition types include:
-	// - "Available": the resource is fully functional
-	// - "Progressing": the resource is being created or updated
-	// - "Degraded": the resource failed to reach or maintain its desired state
-	//
-	// The status of each condition is one of True, False, or Unknown.
-	// +listType=map
-	// +listMapKey=type
-	// +optional
-	Conditions []metav1.Condition `json:"conditions,omitempty"`
+	Phase             string      `json:"phase,omitempty"`
+	TestNamespace     string      `json:"testNamespace,omitempty"`
+	SetupWorkflowName string      `json:"setupWorkflowName,omitempty"`
+	TestWorkflowName  string      `json:"testWorkflowName,omitempty"`
+	WorkflowStartTime metav1.Time `json:"workflowStartTime,omitempty"`
+	TestResults       string      `json:"testResults,omitempty"`
+	Message           string      `json:"message,omitempty"`
 }
 
-// +kubebuilder:object:root=true
-// +kubebuilder:subresource:status
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`
+//+kubebuilder:printcolumn:name="Namespace",type=string,JSONPath=`.status.testNamespace`
+//+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 
 // EphemeralTestEnvironment is the Schema for the ephemeraltestenvironments API
 type EphemeralTestEnvironment struct {
-	metav1.TypeMeta `json:",inline"`
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	// metadata is a standard object metadata
-	// +optional
-	metav1.ObjectMeta `json:"metadata,omitzero"`
-
-	// spec defines the desired state of EphemeralTestEnvironment
-	// +required
-	Spec EphemeralTestEnvironmentSpec `json:"spec"`
-
-	// status defines the observed state of EphemeralTestEnvironment
-	// +optional
-	Status EphemeralTestEnvironmentStatus `json:"status,omitzero"`
+	Spec   EphemeralTestEnvironmentSpec   `json:"spec,omitempty"`
+	Status EphemeralTestEnvironmentStatus `json:"status,omitempty"`
 }
 
-// +kubebuilder:object:root=true
+//+kubebuilder:object:root=true
 
 // EphemeralTestEnvironmentList contains a list of EphemeralTestEnvironment
 type EphemeralTestEnvironmentList struct {
 	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitzero"`
+	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []EphemeralTestEnvironment `json:"items"`
 }
 
