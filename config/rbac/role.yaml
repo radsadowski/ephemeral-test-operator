@@ -1,11 +1,32 @@
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  labels:
-    app.kubernetes.io/name: ephemeral-test-operator
-    app.kubernetes.io/managed-by: kustomize
   name: manager-role
 rules:
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["get", "list", "watch"]
+- apiGroups:
+  - testing.cast.ai
+  resources:
+  - ephemeraltestenvironments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - testing.cast.ai
+  resources:
+  - ephemeraltestenvironments/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - testing.cast.ai
+  resources:
+  - ephemeraltestenvironments/status
+  verbs:
+  - get
+  - patch
+  - update
